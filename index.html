@@ -6,75 +6,33 @@
   <title>Family Finance Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
     :root {
-      --cream: #f5f0e8;
-      --ink: #1a1a2e;
-      --forest: #2d5a3d;
-      --gold: #c9a84c;
-      --coral: #d4614a;
-      --sage: #7a9e7e;
-      --mist: #e8ede9;
-      --paper: #faf8f3;
-      --shadow: rgba(26,26,46,0.08);
-      --border: rgba(26,26,46,0.1);
-      --mono: 'DM Mono', monospace;
-      --serif: 'DM Serif Display', serif;
-      --sans: 'DM Sans', sans-serif;
+      --cream: #f5f0e8; --ink: #1a1a2e; --forest: #2d5a3d; --gold: #c9a84c;
+      --coral: #d4614a; --sage: #7a9e7e; --mist: #e8ede9; --paper: #faf8f3;
+      --border: rgba(26,26,46,0.1); --mono: 'DM Mono', monospace;
+      --serif: 'DM Serif Display', serif; --sans: 'DM Sans', sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--cream); color: var(--ink); min-height: 100vh; }
 
-    body {
-      font-family: var(--sans);
-      background: var(--cream);
-      color: var(--ink);
-      min-height: 100vh;
-    }
-
-    #auth-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--ink);
-      position: relative;
-      overflow: hidden;
-    }
-    #auth-screen::before {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
-      top: -100px; right: -100px;
-    }
-    .auth-card {
-      background: var(--paper);
-      border-radius: 24px;
-      padding: 56px 48px;
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-    }
+    #auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--ink); position: relative; overflow: hidden; }
+    #auth-screen::before { content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%); top: -100px; right: -100px; }
+    .auth-card { background: var(--paper); border-radius: 24px; padding: 56px 48px; width: 100%; max-width: 440px; position: relative; z-index: 1; box-shadow: 0 32px 80px rgba(0,0,0,0.4); }
     .auth-card h1 { font-family: var(--serif); font-size: 2.2rem; color: var(--ink); margin-bottom: 6px; }
     .auth-card .subtitle { font-size: 0.9rem; color: var(--sage); margin-bottom: 36px; font-weight: 300; }
     .auth-field { margin-bottom: 20px; }
     .auth-field label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); opacity: 0.6; margin-bottom: 8px; }
-    .auth-field input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--sans); font-size: 0.95rem; background: var(--cream); color: var(--ink); transition: border-color 0.2s; outline: none; }
+    .auth-field input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--sans); font-size: 0.95rem; background: var(--cream); color: var(--ink); outline: none; }
     .auth-field input:focus { border-color: var(--forest); }
-    .btn-primary { width: 100%; padding: 15px; background: var(--forest); color: white; border: none; border-radius: 10px; font-family: var(--sans); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(45,90,61,0.35); }
+    .btn-primary { width: 100%; padding: 15px; background: var(--forest); color: white; border: none; border-radius: 10px; font-family: var(--sans); font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .btn-primary:hover { opacity: 0.9; }
     .auth-toggle { text-align: center; margin-top: 20px; font-size: 0.875rem; color: var(--ink); opacity: 0.6; }
     .auth-toggle a { color: var(--forest); cursor: pointer; font-weight: 500; }
     .auth-error { background: rgba(212,97,74,0.1); border: 1px solid rgba(212,97,74,0.3); color: var(--coral); padding: 12px 16px; border-radius: 8px; font-size: 0.875rem; margin-bottom: 20px; display: none; }
 
     #dashboard { display: none; }
-
     header { background: var(--ink); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }
     .logo { font-family: var(--serif); font-size: 1.3rem; color: var(--cream); display: flex; align-items: center; gap: 10px; }
     .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
@@ -87,7 +45,7 @@
     .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
     .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
-    .kpi-card { background: var(--paper); border-radius: 16px; padding: 28px 28px 24px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+    .kpi-card { background: var(--paper); border-radius: 16px; padding: 28px; border: 1px solid var(--border); position: relative; overflow: hidden; }
     .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
     .kpi-card.net-worth::before { background: var(--gold); }
     .kpi-card.cash-flow::before { background: var(--forest); }
@@ -96,7 +54,7 @@
     .kpi-value { font-family: var(--mono); font-size: 2.2rem; font-weight: 500; color: var(--ink); line-height: 1; margin-bottom: 8px; }
     .kpi-value.positive { color: var(--forest); }
     .kpi-value.negative { color: var(--coral); }
-    .kpi-sub { font-size: 0.8rem; color: var(--ink); opacity: 0.4; font-weight: 300; }
+    .kpi-sub { font-size: 0.8rem; color: var(--ink); opacity: 0.4; }
 
     .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
     .chart-card { background: var(--paper); border-radius: 16px; padding: 28px; border: 1px solid var(--border); }
@@ -131,7 +89,6 @@
 
     .empty-state { text-align: center; padding: 48px 24px; color: var(--ink); opacity: 0.4; }
     .empty-state .icon { font-size: 2rem; margin-bottom: 12px; }
-
     .toast { position: fixed; bottom: 32px; right: 32px; background: var(--ink); color: var(--cream); padding: 14px 20px; border-radius: 10px; font-size: 0.875rem; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; max-width: 320px; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
@@ -145,6 +102,7 @@
 </head>
 <body>
 
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
     <h1>Family Finance</h1>
@@ -166,6 +124,7 @@
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboard">
   <header>
     <div class="logo"><div class="logo-dot"></div>Family Finance</div>
@@ -174,7 +133,6 @@
       <button id="signout-btn">Sign out</button>
     </div>
   </header>
-
   <div class="main">
     <div class="kpi-row">
       <div class="kpi-card net-worth">
@@ -196,31 +154,14 @@
 
     <div class="section-title">Spending Overview</div>
     <div class="charts-grid">
-      <div class="chart-card">
-        <h3>Budget vs. Actual by Category</h3>
-        <div id="chart-budget"></div>
-      </div>
-      <div class="chart-card">
-        <h3>Spending Breakdown</h3>
-        <div id="chart-donut"></div>
-      </div>
-      <div class="chart-card full-width">
-        <h3>Net Worth Over Time</h3>
-        <div id="chart-networth"></div>
-      </div>
-      <div class="chart-card">
-        <h3>Income vs. Expenses</h3>
-        <div id="chart-cashflow"></div>
-      </div>
+      <div class="chart-card"><h3>Budget vs. Actual by Category</h3><div id="chart-budget"></div></div>
+      <div class="chart-card"><h3>Spending Breakdown</h3><div id="chart-donut"></div></div>
+      <div class="chart-card full-width"><h3>Net Worth Over Time</h3><div id="chart-networth"></div></div>
+      <div class="chart-card"><h3>Income vs. Expenses</h3><div id="chart-cashflow"></div></div>
       <div class="chart-card">
         <h3>Recent Transactions</h3>
         <ul class="tx-list" id="tx-list">
-          <li class="tx-item">
-            <div class="empty-state" style="width:100%">
-              <div class="icon">🔗</div>
-              <p>Connect a bank account to see transactions</p>
-            </div>
-          </li>
+          <li class="tx-item"><div class="empty-state" style="width:100%"><div class="icon">🔗</div><p>Connect a bank account to see transactions</p></div></li>
         </ul>
       </div>
     </div>
@@ -228,15 +169,7 @@
     <div class="section-title">Budget Breakdown</div>
     <div class="chart-card" style="margin-bottom:24px">
       <table class="budget-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Budget</th>
-            <th>Spent</th>
-            <th>Remaining</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th><th>Status</th></tr></thead>
         <tbody id="budget-tbody">
           <tr><td colspan="5"><div class="empty-state"><div class="icon">📊</div><p>No budget data yet</p></div></td></tr>
         </tbody>
@@ -247,10 +180,14 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Supabase and Plaid loaded BEFORE the app script -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script>
-  // ── CONFIGURE THESE ──────────────────────────────────────
-  const SUPABASE_URL  = 'https://fgfmsjttgcqhgjwqijci.supabase.co/rest/v1/';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZm1zanR0Z2NxaGdqd3FpamNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MjYwMzksImV4cCI6MjA5MzQwMjAzOX0.5CrvxAQ1KTFo73CeELcQice_uUTv3yaiF3G_8z6cauU';
+  // ── CONFIGURE THESE TWO LINES ─────────────────────────
+  const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  // ─────────────────────────────────────────────────────
 
   const BUDGETS = {
     'Food and Drink': 1200,
@@ -265,42 +202,54 @@
   const COLORS = ['#2d5a3d','#c9a84c','#d4614a','#7a9e7e','#4a7c9e','#9e4a7c','#7c9e4a','#4a4a9e'];
   const EMOJI  = { 'Food and Drink':'🍽️','Shops':'🛍️','Travel':'✈️','Recreation':'🎮','Healthcare':'💊','Service':'🔧','Transfer':'↔️','Payment':'💳','Other':'📦' };
 
-  // ────────────────────────────────────────────────────────
+  // "sb" avoids clashing with the global window.supabase library object
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   let isSignUp = false, currentUser = null;
 
+  // ── AUTH ──────────────────────────────────────────────
   document.getElementById('auth-toggle-link').addEventListener('click', () => {
     isSignUp = !isSignUp;
-    document.getElementById('auth-btn').textContent          = isSignUp ? 'Create Account' : 'Sign In';
-    document.getElementById('auth-toggle-text').textContent  = isSignUp ? 'Already have an account?' : "Don't have an account?";
-    document.getElementById('auth-toggle-link').textContent  = isSignUp ? ' Sign in' : ' Sign up';
+    document.getElementById('auth-btn').textContent         = isSignUp ? 'Create Account' : 'Sign In';
+    document.getElementById('auth-toggle-text').textContent = isSignUp ? 'Already have an account?' : "Don't have an account?";
+    document.getElementById('auth-toggle-link').textContent = isSignUp ? ' Sign in' : ' Sign up';
+    document.getElementById('auth-error').style.display = 'none';
   });
 
   document.getElementById('auth-btn').addEventListener('click', async () => {
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    const errEl    = document.getElementById('auth-error');
-    errEl.style.display = 'none';
-    if (!email || !password) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+    document.getElementById('auth-error').style.display = 'none';
+    if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+
     const { data, error } = isSignUp
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
-    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
-    if (isSignUp && !data.session) { errEl.textContent = 'Check your email to confirm your account.'; errEl.style.display = 'block'; return; }
+      ? await sb.auth.signUp({ email, password })
+      : await sb.auth.signInWithPassword({ email, password });
+
+    if (error) { showAuthError(error.message); return; }
+    if (isSignUp && !data.session) { showAuthError('Check your email to confirm your account, then sign in.'); return; }
+
     currentUser = data.user || data.session?.user;
     showDashboard();
   });
 
-  supabase.auth.getSession().then(({ data }) => {
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  sb.auth.getSession().then(({ data }) => {
     if (data.session) { currentUser = data.session.user; showDashboard(); }
   });
 
   document.getElementById('signout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     document.getElementById('dashboard').style.display   = 'none';
     document.getElementById('auth-screen').style.display = 'flex';
+    currentUser = null;
   });
 
+  // ── DASHBOARD ─────────────────────────────────────────
   async function showDashboard() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('dashboard').style.display   = 'block';
@@ -309,8 +258,8 @@
 
   async function loadDashboard() {
     const [txRes, nwRes] = await Promise.all([
-      supabase.from('transactions').select('*').order('date', { ascending: false }).limit(200),
-      supabase.from('net_worth_snapshots').select('*').order('snapshot_date', { ascending: true }),
+      sb.from('transactions').select('*').order('date', { ascending: false }).limit(200),
+      sb.from('net_worth_snapshots').select('*').order('snapshot_date', { ascending: true }),
     ]);
     const txs = txRes.data || [], nw = nwRes.data || [];
     renderKPIs(txs, nw);
@@ -322,107 +271,111 @@
     renderBudgetTable(txs);
   }
 
-  function monthTxs(txs) {
+  function thisMonthTxs(txs) {
     const n = new Date();
-    return txs.filter(t => { const d = new Date(t.date); return d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear(); });
+    return txs.filter(t => { const d = new Date(t.date); return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear(); });
   }
 
   function renderKPIs(txs, nw) {
-    const mt      = monthTxs(txs);
-    const income  = mt.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
-    const expense = mt.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
-    const cf      = income - expense;
-    const latestNW= nw.length ? nw[nw.length-1].total_value : null;
-    document.getElementById('kpi-net-worth').textContent   = latestNW!==null ? fmt(latestNW) : '—';
-    document.getElementById('kpi-cash-flow').textContent   = income||expense ? fmt(cf) : '—';
-    document.getElementById('kpi-spending').textContent    = expense ? fmt(expense) : '—';
-    document.getElementById('kpi-cash-flow').className     = 'kpi-value '+(cf>=0?'positive':'negative');
-    document.getElementById('kpi-cash-flow-sub').textContent = income||expense ? `Income ${fmt(income)} · Expenses ${fmt(expense)}` : 'No data this month';
+    const mt = thisMonthTxs(txs);
+    const income  = mt.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+    const expense = mt.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+    const cf = income - expense;
+    const latestNW = nw.length ? nw[nw.length - 1].total_value : null;
+    document.getElementById('kpi-net-worth').textContent     = latestNW !== null ? fmt(latestNW) : '—';
+    document.getElementById('kpi-cash-flow').textContent     = income || expense ? fmt(cf) : '—';
+    document.getElementById('kpi-spending').textContent      = expense ? fmt(expense) : '—';
+    document.getElementById('kpi-cash-flow').className       = 'kpi-value ' + (cf >= 0 ? 'positive' : 'negative');
+    document.getElementById('kpi-cash-flow-sub').textContent = income || expense ? `Income ${fmt(income)} · Expenses ${fmt(expense)}` : 'No data this month';
   }
 
   function spendByCat(txs) {
-    return monthTxs(txs).filter(t=>t.amount>0).reduce((a,t)=>{ const c=t.category||'Other'; a[c]=(a[c]||0)+t.amount; return a; },{});
+    return thisMonthTxs(txs).filter(t => t.amount > 0)
+      .reduce((a, t) => { const c = t.category || 'Other'; a[c] = (a[c] || 0) + t.amount; return a; }, {});
   }
 
   function renderBudgetChart(txs) {
-    const cats=spendByCat(txs), labels=Object.keys(BUDGETS).filter(c=>BUDGETS[c]>0);
-    if(!labels.some(c=>cats[c]>0)){document.getElementById('chart-budget').innerHTML='<div class="empty-state"><div class="icon">📊</div><p>No spending data yet</p></div>';return;}
-    Plotly.newPlot('chart-budget',[
-      {name:'Actual',x:labels.map(c=>cats[c]||0),y:labels,type:'bar',orientation:'h',marker:{color:'#d4614a'}},
-      {name:'Budget',x:labels.map(c=>BUDGETS[c]),y:labels,type:'bar',orientation:'h',marker:{color:'rgba(45,90,61,0.25)'}},
-    ],lay(360),cfg());
+    const cats = spendByCat(txs), labels = Object.keys(BUDGETS).filter(c => BUDGETS[c] > 0);
+    if (!labels.some(c => cats[c] > 0)) { document.getElementById('chart-budget').innerHTML = empty('📊','No spending data yet'); return; }
+    Plotly.newPlot('chart-budget', [
+      { name:'Actual', x:labels.map(c=>cats[c]||0), y:labels, type:'bar', orientation:'h', marker:{color:'#d4614a'} },
+      { name:'Budget', x:labels.map(c=>BUDGETS[c]), y:labels, type:'bar', orientation:'h', marker:{color:'rgba(45,90,61,0.25)'} },
+    ], lay(360), cfg());
   }
 
   function renderDonut(txs) {
-    const cats=spendByCat(txs), entries=Object.entries(cats).filter(([,v])=>v>0);
-    if(!entries.length){document.getElementById('chart-donut').innerHTML='<div class="empty-state"><div class="icon">🍩</div><p>No spending data yet</p></div>';return;}
-    Plotly.newPlot('chart-donut',[{labels:entries.map(e=>e[0]),values:entries.map(e=>e[1]),type:'pie',hole:0.55,marker:{colors:COLORS},textinfo:'none',hovertemplate:'<b>%{label}</b><br>%{value:$,.0f}<extra></extra>'}],{...lay(300),showlegend:true},cfg());
+    const cats = spendByCat(txs), entries = Object.entries(cats).filter(([,v]) => v > 0);
+    if (!entries.length) { document.getElementById('chart-donut').innerHTML = empty('🍩','No spending data yet'); return; }
+    Plotly.newPlot('chart-donut', [{ labels:entries.map(e=>e[0]), values:entries.map(e=>e[1]), type:'pie', hole:0.55, marker:{colors:COLORS}, textinfo:'none' }], {...lay(300), showlegend:true}, cfg());
   }
 
   function renderNetWorthChart(data) {
-    if(!data.length){document.getElementById('chart-networth').innerHTML='<div class="empty-state"><div class="icon">📈</div><p>Net worth history will appear here</p></div>';return;}
-    Plotly.newPlot('chart-networth',[{x:data.map(d=>d.snapshot_date),y:data.map(d=>d.total_value),type:'scatter',mode:'lines',fill:'tozeroy',line:{color:'#c9a84c',width:2.5,shape:'spline'},fillcolor:'rgba(201,168,76,0.08)'}],lay(280),cfg());
+    if (!data.length) { document.getElementById('chart-networth').innerHTML = empty('📈','Net worth history will appear here'); return; }
+    Plotly.newPlot('chart-networth', [{ x:data.map(d=>d.snapshot_date), y:data.map(d=>d.total_value), type:'scatter', mode:'lines', fill:'tozeroy', line:{color:'#c9a84c',width:2.5,shape:'spline'}, fillcolor:'rgba(201,168,76,0.08)' }], lay(280), cfg());
   }
 
   function renderCashFlowChart(txs) {
-    const m={};
-    txs.forEach(t=>{const d=new Date(t.date),k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!m[k])m[k]={income:0,expense:0};if(t.amount<0)m[k].income+=Math.abs(t.amount);else m[k].expense+=t.amount;});
-    const keys=Object.keys(m).sort();
-    if(!keys.length){document.getElementById('chart-cashflow').innerHTML='<div class="empty-state"><div class="icon">💸</div><p>Cash flow data will appear here</p></div>';return;}
-    Plotly.newPlot('chart-cashflow',[
-      {name:'Income',x:keys,y:keys.map(k=>m[k].income),type:'bar',marker:{color:'#2d5a3d'}},
-      {name:'Expenses',x:keys,y:keys.map(k=>m[k].expense),type:'bar',marker:{color:'#d4614a'}},
-    ],{...lay(320),barmode:'group'},cfg());
+    const m = {};
+    txs.forEach(t => { const d=new Date(t.date), k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; if(!m[k])m[k]={income:0,expense:0}; if(t.amount<0)m[k].income+=Math.abs(t.amount); else m[k].expense+=t.amount; });
+    const keys = Object.keys(m).sort();
+    if (!keys.length) { document.getElementById('chart-cashflow').innerHTML = empty('💸','Cash flow data will appear here'); return; }
+    Plotly.newPlot('chart-cashflow', [
+      { name:'Income',   x:keys, y:keys.map(k=>m[k].income),  type:'bar', marker:{color:'#2d5a3d'} },
+      { name:'Expenses', x:keys, y:keys.map(k=>m[k].expense), type:'bar', marker:{color:'#d4614a'} },
+    ], {...lay(320), barmode:'group'}, cfg());
   }
 
   function renderTransactions(txs) {
-    const el=document.getElementById('tx-list');
-    if(!txs.length){el.innerHTML='<li class="tx-item"><div class="empty-state" style="width:100%"><div class="icon">🔗</div><p>Connect a bank account to see transactions</p></div></li>';return;}
-    el.innerHTML=txs.map(t=>{
-      const credit=t.amount<0, amt=fmt(Math.abs(t.amount)), date=new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const el = document.getElementById('tx-list');
+    if (!txs.length) { el.innerHTML = `<li class="tx-item">${empty('🔗','Connect a bank account to see transactions')}</li>`; return; }
+    el.innerHTML = txs.map(t => {
+      const credit = t.amount < 0, amt = fmt(Math.abs(t.amount));
+      const date = new Date(t.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
       return `<li class="tx-item"><div class="tx-icon">${EMOJI[t.category]||'📦'}</div><div class="tx-info"><div class="tx-name">${esc(t.name)}</div><div class="tx-date">${date} · ${esc(t.category||'Uncategorized')}</div></div><div class="tx-amount ${credit?'credit':'debit'}">${credit?'+':'-'}${amt}</div></li>`;
     }).join('');
   }
 
   function renderBudgetTable(txs) {
-    const cats=spendByCat(txs);
-    const rows=Object.entries(BUDGETS).filter(([,b])=>b>0).map(([cat,budget],i)=>{
-      const spent=cats[cat]||0, pct=Math.min((spent/budget)*100,100), rem=budget-spent;
-      const cls=pct>=100?'over':pct>=80?'warn':'ok', label=pct>=100?'Over budget':pct>=80?'Near limit':'On track';
+    const cats = spendByCat(txs);
+    const rows = Object.entries(BUDGETS).filter(([,b]) => b > 0).map(([cat, budget], i) => {
+      const spent = cats[cat]||0, pct = Math.min((spent/budget)*100,100), rem = budget-spent;
+      const cls = pct>=100?'over':pct>=80?'warn':'ok', label = pct>=100?'Over budget':pct>=80?'Near limit':'On track';
       return `<tr><td><span class="category-dot" style="background:${COLORS[i%COLORS.length]}"></span>${esc(cat)}<div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div></td><td>${fmt(budget)}</td><td>${fmt(spent)}</td><td style="font-family:var(--mono);color:${rem>=0?'var(--forest)':'var(--coral)'}">${fmt(Math.abs(rem))}${rem<0?' over':''}</td><td><span class="badge ${cls}">${label}</span></td></tr>`;
     });
-    document.getElementById('budget-tbody').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5"><div class="empty-state"><div class="icon">📊</div><p>No data yet</p></div></td></tr>';
+    document.getElementById('budget-tbody').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="5">${empty('📊','No data yet')}</td></tr>`;
   }
 
+  // ── PLAID ─────────────────────────────────────────────
   document.getElementById('connect-btn').addEventListener('click', async () => {
     try {
-      const res = await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'create_link_token',user_id:currentUser.id}) });
+      const res = await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'create_link_token', user_id:currentUser.id}) });
       const { link_token } = await res.json();
-      if (!link_token) throw new Error('No link token');
+      if (!link_token) throw new Error('No link token returned');
       const handler = window.Plaid.create({
         token: link_token,
         onSuccess: async (public_token, metadata) => {
           showToast('Linking your account…');
-          const ex = await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'exchange_token',public_token,user_id:currentUser.id}) });
+          const ex = await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'exchange_token', public_token, user_id:currentUser.id}) });
           const { access_token, item_id } = await ex.json();
-          await supabase.from('plaid_items').upsert({ user_id:currentUser.id, access_token, item_id, institution_name:metadata.institution?.name||'Unknown' });
+          await sb.from('plaid_items').upsert({ user_id:currentUser.id, access_token, item_id, institution_name:metadata.institution?.name||'Unknown' });
           showToast('Fetching your data…');
-          await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'sync',access_token,user_id:currentUser.id}) });
+          await fetch('/.netlify/functions/plaid', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'sync', access_token, user_id:currentUser.id}) });
           showToast('✅ Account connected!');
           setTimeout(loadDashboard, 1500);
         },
-        onExit: (err) => { if(err) showToast('Connection cancelled.'); },
+        onExit: (err) => { if (err) showToast('Connection cancelled.'); },
       });
       handler.open();
-    } catch(e) { showToast('Error: '+e.message); }
+    } catch(e) { showToast('Error: ' + e.message); }
   });
 
+  // ── HELPERS ───────────────────────────────────────────
   function fmt(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
   function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function empty(icon, msg) { return `<div class="empty-state"><div class="icon">${icon}</div><p>${msg}</p></div>`; }
   function lay(h) { return { height:h, margin:{t:10,r:10,b:40,l:100}, paper_bgcolor:'transparent', plot_bgcolor:'transparent', font:{family:"'DM Sans'",color:'#1a1a2e'}, showlegend:false, xaxis:{gridcolor:'rgba(26,26,46,0.06)',tickformat:'$,.0f',tickfont:{size:11}}, yaxis:{gridcolor:'rgba(26,26,46,0.06)',tickfont:{size:11}} }; }
   function cfg() { return { displayModeBar:false, responsive:true }; }
   function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500); }
 </script>
-<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js" async></script>
 </body>
 </html>
