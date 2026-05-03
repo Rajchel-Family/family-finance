@@ -266,7 +266,7 @@
   const EMOJI  = { 'Food and Drink':'🍽️','Shops':'🛍️','Travel':'✈️','Recreation':'🎮','Healthcare':'💊','Service':'🔧','Transfer':'↔️','Payment':'💳','Other':'📦' };
 
   // ────────────────────────────────────────────────────────
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   let isSignUp = false, currentUser = null;
 
   document.getElementById('auth-toggle-link').addEventListener('click', () => {
